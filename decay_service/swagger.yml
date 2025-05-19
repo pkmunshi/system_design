@@ -1,0 +1,133 @@
+openapi: 3.0.0
+info:
+  title: Decay Service API
+  description: A microservice that implements an exponential decay scoring system for tracking trending items
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+
+servers:
+  - url: http://localhost:8000
+    description: Local development server
+  - url: https://api.example.com
+    description: Production server
+
+paths:
+  /add_event:
+    post:
+      summary: Add a new event to the trending system
+      description: Adds an event with a weight and timestamp to calculate its decayed score
+      operationId: addEvent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddEventRequest'
+      responses:
+        '200':
+          description: Event added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Bad request - missing required fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /trending:
+    get:
+      summary: Get trending items
+      description: Retrieves the top trending items based on their decayed scores
+      operationId: getTrending
+      parameters:
+        - name: count
+          in: query
+          description: Number of items to return
+          required: false
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+      responses:
+        '200':
+          description: List of trending items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TrendingItem'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    AddEventRequest:
+      type: object
+      required:
+        - item_id
+        - event_time
+      properties:
+        item_id:
+          type: string
+          description: Unique identifier for the item
+        event_time:
+          type: integer
+          description: Unix timestamp of the event
+          format: int64
+        weight:
+          type: number
+          description: Weight of the event (defaults to 1.0)
+          format: float
+          default: 1.0
+      example:
+        item_id: "article_123"
+        event_time: 1647123456
+        weight: 1.5
+
+    TrendingItem:
+      type: object
+      properties:
+        item_id:
+          type: string
+          description: Unique identifier of the item
+        score:
+          type: number
+          description: Decayed score of the item
+          format: float
+      example:
+        item_id: "article_123"
+        score: 0.856432
+
+    SuccessResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Success message
+      example:
+        message: "Event added successfully"
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+      example:
+        error: "item_id and event_time are required" 
