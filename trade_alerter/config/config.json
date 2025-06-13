@@ -1,0 +1,5 @@
+{
+  "login_url": "https://value-trades.com/login.php",
+  "target_url": "https://value-trades.com/getDailyTrades.php?dateFilter={date}",
+  "post_selector": "div.sub-heading.animate-box"
+}
