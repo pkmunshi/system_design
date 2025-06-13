@@ -1,0 +1,46 @@
+name: Check Post Updates
+
+on:
+  schedule:
+    - cron: '*/15 * * * 1-5'  # Run every 15 minutes, Monday through Friday
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  check-post:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        
+    - name: Install Chrome
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y google-chrome-stable
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Create required directories
+      run: |
+        mkdir -p data logs
+        # Set proper permissions
+        chmod 700 data logs
+        
+    - name: Run post checker
+      env:
+        TRADE_USERNAME: ${{ secrets.TRADE_USERNAME }}
+        TRADE_PASSWORD: ${{ secrets.TRADE_PASSWORD }}
+        SNS_TOPIC_ARN: ${{ secrets.SNS_TOPIC_ARN }}
+        FROM_EMAIL: ${{ secrets.FROM_EMAIL }}
+        GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+        TO_SMS_NUMBER: ${{ secrets.TO_SMS_NUMBER }}
+        TO_EMAILS: ${{ secrets.TO_EMAILS }}
+        ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
+      run: python main.py

@@ -1,0 +1,5 @@
+{
+  "login_url": "https://example.com/login",
+  "target_url": "https://example.com/posts?date={date}",
+  "post_selector": "div.post-content"
+} 
